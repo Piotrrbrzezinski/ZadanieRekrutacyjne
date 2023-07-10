@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>User List</title>
+</head>
+<body>
+<h1>User List</h1>
+<table>
+    <tr>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Pesel</th>
+        <th>Contact Info</th>
+    </tr>
+    <tr th:each="userDTO : ${users}">
+        <td th:text="${userDTO.firstName}"></td>
+        <td th:text="${userDTO.lastName}"></td>
+        <td th:text="${userDTO.pesel}"></td>
+        <td>
+            <ul th:each="contactInfoDTO : ${userDTO.contactInfos}">
+                <li><strong>Email:</strong> <span th:text="${contactInfoDTO.email}"></span></li>
+                <li><strong>Residence Address:</strong> <span th:text="${contactInfoDTO.residenceAddress}"></span></li>
+                <li><strong>Registration Address:</strong> <span th:text="${contactInfoDTO.registrationAddress}"></span></li>
+                <li><strong>Private Phone Number:</strong> <span th:text="${contactInfoDTO.privatePhoneNumber}"></span></li>
+                <li><strong>Work Phone Number:</strong> <span th:text="${contactInfoDTO.workPhoneNumber}"></span></li>
+            </ul>
+        </td>
+    </tr>
+</table>
+</body>
+</html>

@@ -16,7 +16,7 @@ import java.util.Random;
 @AllArgsConstructor
 public class UserGenerationServiceImpl implements UserGenerationService {
 
-    private static final int NUMBER_OF_USERS = 5;
+    private static final int NUMBER_OF_USERS = 15000;
 
     private UserService userService;
 

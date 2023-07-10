@@ -1,79 +1,67 @@
-/*package com.rekrutacja.zadanie;
+package com.rekrutacja.zadanie;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rekrutacja.zadanie.controllers.UserRESTController;
-import com.rekrutacja.zadanie.model.entitys.ContactInfo;
-import com.rekrutacja.zadanie.model.entitys.User;
+import com.rekrutacja.zadanie.model.DTO.ContactInfoDTO;
+import com.rekrutacja.zadanie.model.DTO.UserDTO;
+import com.rekrutacja.zadanie.model.DTO.UserDTOWithoutContactInfos;
 import com.rekrutacja.zadanie.services.interfaces.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.mockito.MockitoAnnotations;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
-import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
 public class UserRESTControllerTest {
 
-	@Mock
-	private UserService userService;
+    private UserRESTController userRestController;
+    @Mock
+    private UserService userService;
 
-	@InjectMocks
-	private UserRESTController userRestController;
+    private UserDTO userDto;
 
-	private MockMvc mockMvc;
+    @BeforeEach
+    public void setup() {
+        MockitoAnnotations.initMocks(this);
+        userRestController = new UserRESTController(userService, new ObjectMapper(), null);
+        userDto = new UserDTO();
+        userDto.setFirstName("Test");
+        userDto.setLastName("Test");
+        userDto.setPesel("12345678912");
+        userDto.setContactInfos(new HashSet<>());
+    }
 
-	@BeforeEach
-	public void setUp() {
-		mockMvc = MockMvcBuilders.standaloneSetup(userRestController).build();
-	}
+    @Test
+    public void testCreateUser() throws Exception {
+        when(userService.createUser(any(UserDTOWithoutContactInfos.class))).thenReturn(userDto);
+        ResponseEntity<UserDTO> response = userRestController.createUser(new UserDTOWithoutContactInfos());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(userDto, response.getBody());
+    }
 
-	@Test
-	public void testAddContactInfo() throws Exception {
-		User user = new User(); // dane testowe
-		when(userService.addContactInfo(anyLong(), any(ContactInfo.class))).thenReturn(user);
-		mockMvc.perform(post("/api/users/1/contactInfos")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content("{\"email\":\"test@example.com\"}"))
-				.andExpect(status().isCreated());
-	}
+    @Test
+    public void testAddContactInfo() throws Exception {
+        String pesel = "12345678912";
+        ContactInfoDTO contactInfoDto = new ContactInfoDTO();
+        contactInfoDto.setEmail("test@example.com");
+        /*contactInfoDto.setResidenceAddress("Residence Address");
+        contactInfoDto.setRegistrationAddress("Registration Address");
+        contactInfoDto.setPrivatePhoneNumber("+123456789");
+        contactInfoDto.setWorkPhoneNumber("+987654321");*/
 
-	@Test
-	public void testGetAllUsers() throws Exception {
-		User user1 = new User(); // dane testowe
-		User user2 = new User(); // dane testowe
-		when(userService.getAllUsers()).thenReturn(Arrays.asList(user1, user2));
-		mockMvc.perform(get("/api/users")
-						.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-				.andExpect(jsonPath("$").isArray());
-	}
-
-	@Test
-	public void testGetUserByPesel() throws Exception {
-		User user = new User(); // dane testowe
-		when(userService.getUserByPesel(any(String.class))).thenReturn(user);
-		mockMvc.perform(get("/api/users/12345678901") // przykładowy PESEL
-						.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
-	}
-
-	@Test
-	public void testExportUsersToFile() throws Exception {
-		mockMvc.perform(post("/api/users/export")
-						.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
-}*/
+        when(userService.addContactInfoByPesel(pesel, contactInfoDto)).thenReturn(userDto);
+        ResponseEntity<UserDTO> response = userRestController.addContactInfo(pesel, contactInfoDto);
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(userDto, response.getBody());
+    }
+}
